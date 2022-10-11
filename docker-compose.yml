@@ -6,6 +6,26 @@ services:
         volumes:
             - dynamodb:/home/dynamodblocal
         ports:
-            - 8001:8000
+            - 8000:8000
         networks:
             - lambda-local
+    awscli:
+        build:
+            context: ./aws-cli
+            dockerfile: Dockerfile-awscli
+        entrypoint: [""]
+        tty: true
+        command:
+            - /bin/sh
+        volumes:
+            - ./bin:/usr/app
+        networks:
+            - lambda-local
+volumes:
+    dynamodb:
+        driver: local
+    bin:
+        driver: local
+networks:
+    lambda-local:
+        external: true
