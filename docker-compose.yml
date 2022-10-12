@@ -9,3 +9,9 @@ services:
             - 8000:8000
         networks:
             - lambda-local
+volumes:
+    dynamodb:
+        driver: local
+networks:
+    lambda-local:
+        external: true

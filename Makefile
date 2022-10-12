@@ -4,7 +4,7 @@ build:
 	sam build
 
 docker-build:
-	docker network create lambda-local-test
+	docker network create lambda-local
 	docker compose up -d --build
 
 
