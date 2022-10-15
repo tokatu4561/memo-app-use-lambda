@@ -3,13 +3,6 @@
 build:
 	sam build
 
-docker-build:
-	docker network create lambda-local
-	docker compose up -d --build
-
-
-# docker-compose up -d
-# go run main.go
 
 # aws dynamodb \
 #   --region ap-northeast-1 \
@@ -32,12 +25,3 @@ docker-build:
 #         "id": {"S": "123"},
 #         "name": {"S": "Test"}
 #       }'
-
-# docker network create lambda-local
-
-
-# AWS profile(初回のみ)
-# localのDynamoDB
-# $ aws configure set aws_access_key_id dummy     --profile local
-# $ aws configure set aws_secret_access_key dummy --profile local
-# $ aws configure set region ap-northeast-1       --profile local
