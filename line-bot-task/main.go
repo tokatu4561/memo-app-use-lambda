@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 
@@ -11,16 +10,35 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 )
 
-var (
-	// DefaultHTTPGetAddress Default Address
-	DefaultHTTPGetAddress = "https://checkip.amazonaws.com"
+// 初期作成されるテンプレート 参考のため残しておく
+// var (
+// 	// DefaultHTTPGetAddress Default Address
+// 	DefaultHTTPGetAddress = "https://checkip.amazonaws.com"
 
-	// ErrNoIP No IP found in response
-	ErrNoIP = errors.New("No IP in HTTP response")
+// 	// ErrNoIP No IP found in response
+// 	ErrNoIP = errors.New("No IP in HTTP response")
 
-	// ErrNon200Response non 200 status code in response
-	ErrNon200Response = errors.New("Non 200 Response found")
-)
+// 	// ErrNon200Response non 200 status code in response
+// 	ErrNon200Response = errors.New("Non 200 Response found")
+// )
+
+// resp, err := http.Get(DefaultHTTPGetAddress)
+// if err != nil {
+// 	return events.APIGatewayProxyResponse{}, err
+// }
+
+// if resp.StatusCode != 200 {
+// 	return events.APIGatewayProxyResponse{}, ErrNon200Response
+// }
+
+// ip, err := ioutil.ReadAll(resp.Body)
+// if err != nil {
+// 	return events.APIGatewayProxyResponse{}, err
+// }
+
+// if len(ip) == 0 {
+// 	return events.APIGatewayProxyResponse{}, ErrNoIP
+// }
 
 // TODO: env管理する
 const AWS_REGION = "ap-northeast-1"
@@ -40,41 +58,14 @@ type Line struct {
 }
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// resp, err := http.Get(DefaultHTTPGetAddress)
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{}, err
-	// }
-
-	// if resp.StatusCode != 200 {
-	// 	return events.APIGatewayProxyResponse{}, ErrNon200Response
-	// }
-
-	// ip, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return events.APIGatewayProxyResponse{}, err
-	// }
-
-	// if len(ip) == 0 {
-	// 	return events.APIGatewayProxyResponse{}, ErrNoIP
-	// }
-
-	bot, err := linebot.New(
-		os.Getenv("LINE_BOT_CHANNEL_SECRET"),
-		os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
-	)
-	line := Line{
-		ChannelSecret: os.Getenv("LINE_BOT_CHANNEL_SECRET"),
-		ChannelToken:  os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
-		Client:        bot,
+	line, err := setUpLineClient()
+	if err != nil {
+		return events.APIGatewayProxyResponse{Body: "LINE接続エラー", StatusCode: 500}, err
 	}
 
+	lineEvents, err := line.ParseRequest(request)
 	if err != nil {
-		return events.APIGatewayProxyResponse{Body: "接続エラー", StatusCode: 200}, err
-	}
-
-	lineEvents, err := ParseRequest(line.ChannelSecret, request)
-	if err != nil {
-		return events.APIGatewayProxyResponse{Body: "接続エラー", StatusCode: 200}, err
+		return events.APIGatewayProxyResponse{Body: "LINE接続エラー", StatusCode: 500}, err
 	}
 
 	for _, event := range lineEvents {
@@ -84,7 +75,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 			case *linebot.TextMessage:
 				replyMessage := message.Text
-				_, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+				_, err = line.Client.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				if err != nil {
 					return events.APIGatewayProxyResponse{}, err
 				}
@@ -143,14 +134,34 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}, nil
 }
 
-func ParseRequest(channelSecret string, r events.APIGatewayProxyRequest) ([]*linebot.Event, error) {
+func (l *Line) ParseRequest(r events.APIGatewayProxyRequest) ([]*linebot.Event, error) {
 	req := &struct {
 		Events []*linebot.Event `json:"events"`
 	}{}
 	if err := json.Unmarshal([]byte(r.Body), req); err != nil {
 		return nil, err
 	}
+
 	return req.Events, nil
+}
+
+func setUpLineClient() (*Line, error) {
+	line := &Line{
+		ChannelSecret: os.Getenv("LINE_BOT_CHANNEL_SECRET"),
+		ChannelToken:  os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
+	}
+
+	bot, err := linebot.New(
+		line.ChannelSecret,
+		line.ChannelToken,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	line.Client = bot
+
+	return line, nil
 }
 
 func main() {
