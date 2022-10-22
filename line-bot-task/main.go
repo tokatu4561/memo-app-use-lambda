@@ -1,15 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/guregu/dynamo"
+	"github.com/line/line-bot-sdk-go/linebot"
 )
 
 var (
@@ -34,6 +33,12 @@ type User struct {
 	Text   string `dynamo:"Text"`
 }
 
+type Line struct {
+	ChannelSecret string
+	ChannelToken  string
+	Client        *linebot.Client
+}
+
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// resp, err := http.Get(DefaultHTTPGetAddress)
 	// if err != nil {
@@ -53,54 +58,99 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// 	return events.APIGatewayProxyResponse{}, ErrNoIP
 	// }
 
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(AWS_REGION),
-		Endpoint:    aws.String(DYNAMO_ENDPOINT),
-		Credentials: credentials.NewStaticCredentials("dummy", "dummy", "dummy"),
-	})
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
-			StatusCode: 500,
-		}, nil
+	bot, err := linebot.New(
+		os.Getenv("LINE_BOT_CHANNEL_SECRET"),
+		os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
+	)
+	line := Line{
+		ChannelSecret: os.Getenv("LINE_BOT_CHANNEL_SECRET"),
+		ChannelToken:  os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
+		Client:        bot,
 	}
 
-	db := dynamo.New(sess)
-
-	db.Table("UserTable").DeleteTable().Run()
-
-	err = db.CreateTable("UserTable", User{}).Run()
 	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
-			StatusCode: 500,
-		}, nil
-	}
-	table := db.Table("UserTable")
-
-	var user User
-
-	err = table.Put(&User{UserID: "1234", Name: "太郎", Age: 20}).Run()
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
-			StatusCode: 500,
-		}, nil
+		return events.APIGatewayProxyResponse{Body: "接続エラー", StatusCode: 200}, err
 	}
 
-	err = table.Get("UserID", "1234").Range("Name", dynamo.Equal, "太郎").One(&user)
+	lineEvents, err := ParseRequest(line.ChannelSecret, request)
 	if err != nil {
-		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
-			StatusCode: 500,
-		}, nil
+		return events.APIGatewayProxyResponse{Body: "接続エラー", StatusCode: 200}, err
 	}
-	fmt.Printf("GetDB%+v\n", user)
+
+	for _, event := range lineEvents {
+		// イベントがメッセージの受信だった場合
+		if event.Type == linebot.EventTypeMessage {
+			switch message := event.Message.(type) {
+
+			case *linebot.TextMessage:
+				replyMessage := message.Text
+				_, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+				if err != nil {
+					return events.APIGatewayProxyResponse{}, err
+				}
+			default:
+			}
+		}
+	}
+
+	// sess, err := session.NewSession(&aws.Config{
+	// 	Region:      aws.String(AWS_REGION),
+	// 	Endpoint:    aws.String(DYNAMO_ENDPOINT),
+	// 	Credentials: credentials.NewStaticCredentials("dummy", "dummy", "dummy"),
+	// })
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body:       err.Error(),
+	// 		StatusCode: 500,
+	// 	}, nil
+	// }
+
+	// db := dynamo.New(sess)
+
+	// db.Table("UserTable").DeleteTable().Run()
+
+	// err = db.CreateTable("UserTable", User{}).Run()
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body:       err.Error(),
+	// 		StatusCode: 500,
+	// 	}, nil
+	// }
+	// table := db.Table("UserTable")
+
+	// var user User
+
+	// err = table.Put(&User{UserID: "1234", Name: "太郎", Age: 20}).Run()
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body:       err.Error(),
+	// 		StatusCode: 500,
+	// 	}, nil
+	// }
+
+	// err = table.Get("UserID", "1234").Range("Name", dynamo.Equal, "太郎").One(&user)
+	// if err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		Body:       err.Error(),
+	// 		StatusCode: 500,
+	// 	}, nil
+	// }
+	// fmt.Printf("GetDB%+v\n", user)
 
 	return events.APIGatewayProxyResponse{
 		Body:       fmt.Sprintf("Hello, %v", string("hello")),
 		StatusCode: 200,
 	}, nil
+}
+
+func ParseRequest(channelSecret string, r events.APIGatewayProxyRequest) ([]*linebot.Event, error) {
+	req := &struct {
+		Events []*linebot.Event `json:"events"`
+	}{}
+	if err := json.Unmarshal([]byte(r.Body), req); err != nil {
+		return nil, err
+	}
+	return req.Events, nil
 }
 
 func main() {

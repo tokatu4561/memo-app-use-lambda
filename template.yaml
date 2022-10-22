@@ -31,6 +31,20 @@ Resources:
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
           PARAM1: VALUE
+  # CalcFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     CodeUri: calc/dist
+  #     Handler: app.lambdaHandler
+  #     Runtime: go1.x
+  #     Architectures:
+  #       - x86_64
+  #     Events:
+  #       Calc:
+  #         Type: Api
+  #         Properties:
+  #           Path: /apigw
+  #           Method: post
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
