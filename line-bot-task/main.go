@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -11,16 +12,16 @@ import (
 )
 
 // 初期作成されるテンプレート 参考のため残しておく
-// var (
-// 	// DefaultHTTPGetAddress Default Address
-// 	DefaultHTTPGetAddress = "https://checkip.amazonaws.com"
+var (
+	// DefaultHTTPGetAddress Default Address
+	DefaultHTTPGetAddress = "https://checkip.amazonaws.com"
 
-// 	// ErrNoIP No IP found in response
-// 	ErrNoIP = errors.New("No IP in HTTP response")
+	// ErrNoIP No IP found in response
+	ErrNoIP = errors.New("No IP in HTTP response")
 
-// 	// ErrNon200Response non 200 status code in response
-// 	ErrNon200Response = errors.New("Non 200 Response found")
-// )
+	// ErrNon200Response non 200 status code in response
+	ErrNon200Response = errors.New("Non 200 Response found")
+)
 
 // resp, err := http.Get(DefaultHTTPGetAddress)
 // if err != nil {

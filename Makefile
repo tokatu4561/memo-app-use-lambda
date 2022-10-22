@@ -3,6 +3,9 @@
 build:
 	sam build
 
+invoke:
+	sam local invoke --env-vars env.json
+
 
 # aws dynamodb \
 #   --region ap-northeast-1 \

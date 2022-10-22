@@ -4,6 +4,13 @@ Description: >
   line-dynamo-lambda
   
   Sample SAM Template for line-dynamo-lambda
+Description: >
+  Sample function
+Parameters: 
+  LineBotChannelSecret:
+    Type: String
+  LineBotChannelToken:
+    Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -30,7 +37,9 @@ Resources:
             Method: GET
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
-          PARAM1: VALUE
+          LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
+          LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
+          TABLE_NAME: sample_table
   # CalcFunction:
   #   Type: AWS::Serverless::Function
   #   Properties:
@@ -45,6 +54,22 @@ Resources:
   #         Properties:
   #           Path: /apigw
   #           Method: post
+
+  SampleTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: sample_table
+      AttributeDefinitions: 
+        - AttributeName: sample_pk
+          AttributeType: S
+        - AttributeName: sample_sk
+          AttributeType: N
+      KeySchema: 
+        - AttributeName: sample_pk
+          KeyType: HASH
+        - AttributeName: sample_sk
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
