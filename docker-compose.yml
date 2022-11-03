@@ -9,6 +9,18 @@ services:
             - 8000:8000
         networks:
             - lambda-local
+    dynamodb-admin:
+        container_name: dynamodb-admin
+        image: aaronshaf/dynamodb-admin:latest
+        environment:
+            - DYNAMO_ENDPOINT=dynamodb:8000
+            - AWS_REGION=ap-northeast-1
+        ports:
+            - 8001:8001
+        networks:
+            - lambda-local
+        depends_on:
+            - dynamodb
 volumes:
     dynamodb:
         driver: local

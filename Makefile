@@ -31,3 +31,5 @@ invoke:
 #         "id": {"S": "123"},
 #         "name": {"S": "Test"}
 #       }'
+
+# docker network create lambda-local
