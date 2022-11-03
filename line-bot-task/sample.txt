@@ -1,0 +1,35 @@
+// 初期作成されるテンプレート 参考のため残しておく
+var (
+	// DefaultHTTPGetAddress Default Address
+	DefaultHTTPGetAddress = "https://checkip.amazonaws.com"
+
+	// ErrNoIP No IP found in response
+	ErrNoIP = errors.New("No IP in HTTP response")
+
+	// ErrNon200Response non 200 status code in response
+	ErrNon200Response = errors.New("Non 200 Response found")
+)
+
+// resp, err := http.Get(DefaultHTTPGetAddress)
+// if err != nil {
+// 	return events.APIGatewayProxyResponse{}, err
+// }
+
+// if resp.StatusCode != 200 {
+// 	return events.APIGatewayProxyResponse{}, ErrNon200Response
+// }
+
+// ip, err := ioutil.ReadAll(resp.Body)
+// if err != nil {
+// 	return events.APIGatewayProxyResponse{}, err
+// }
+
+// if len(ip) == 0 {
+// 	return events.APIGatewayProxyResponse{}, ErrNoIP
+// }
+
+// db.Table("Memo").DeleteTable().Run()
+	// err = db.CreateTable("Memo", User{}).Run()
+	// err = table.Get("UserID", "1234").Range("Name", dynamo.Equal, "太郎").One(&user)
+	// err = table.Update("UserID", "1234").Range("Name", "太郎").Set("Text", text).Value(&user)
+	// err = table.Delete("UserID", "1").Range("Name", "Test1").Run()

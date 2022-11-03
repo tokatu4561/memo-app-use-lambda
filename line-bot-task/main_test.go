@@ -11,12 +11,7 @@ import (
 
 func TestHandler(t *testing.T) {
 	t.Run("Unable to get IP", func(t *testing.T) {
-		DefaultHTTPGetAddress = "http://127.0.0.1:12345"
 
-		_, err := handler(events.APIGatewayProxyRequest{})
-		if err == nil {
-			t.Fatal("Error failed to trigger with an invalid request")
-		}
 	})
 
 	t.Run("Non 200 Response", func(t *testing.T) {
@@ -24,13 +19,6 @@ func TestHandler(t *testing.T) {
 			w.WriteHeader(500)
 		}))
 		defer ts.Close()
-
-		DefaultHTTPGetAddress = ts.URL
-
-		_, err := handler(events.APIGatewayProxyRequest{})
-		if err != nil && err.Error() != ErrNon200Response.Error() {
-			t.Fatalf("Error failed to trigger with an invalid HTTP response: %v", err)
-		}
 	})
 
 	t.Run("Unable decode IP", func(t *testing.T) {
@@ -38,8 +26,6 @@ func TestHandler(t *testing.T) {
 			w.WriteHeader(500)
 		}))
 		defer ts.Close()
-
-		DefaultHTTPGetAddress = ts.URL
 
 		_, err := handler(events.APIGatewayProxyRequest{})
 		if err == nil {
@@ -53,8 +39,6 @@ func TestHandler(t *testing.T) {
 			fmt.Fprintf(w, "127.0.0.1")
 		}))
 		defer ts.Close()
-
-		DefaultHTTPGetAddress = ts.URL
 
 		_, err := handler(events.APIGatewayProxyRequest{})
 		if err != nil {
