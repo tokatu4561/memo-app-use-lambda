@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -17,18 +16,6 @@ import (
 // TODO: env管理する
 const AWS_REGION = "ap-northeast-1"
 const DYNAMO_ENDPOINT = "http://dynamodb:8000"
-
-type Memo struct {
-	MemoID    string `dynamo:"MemoID,hash"`
-	Text      string `dynamo:"Text"`
-	CreatedAt string `dynamo:"CreatedAt"`
-}
-
-type Line struct {
-	ChannelSecret string
-	ChannelToken  string
-	Client        *linebot.Client
-}
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	line, err := setUpLineClient()
@@ -50,7 +37,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 			case *linebot.TextMessage:
 				replyMessage := message.Text
-				line.SaveMemo(db, replyMessage)
+				memo := Memo{}
+				memo.Insert(db, replyMessage)
 				_, err = line.Client.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				if err != nil {
 					return events.APIGatewayProxyResponse{
@@ -69,27 +57,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}, nil
 }
 
-func (l *Line) SaveMemo(db *dynamo.DB, text string) error {
-	table := db.Table("Momo")
-
-	err := table.Put(&Memo{MemoID: "1234", Text: text, CreatedAt: "sss"}).Run()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (l *Line) ParseRequest(r events.APIGatewayProxyRequest) ([]*linebot.Event, error) {
-	req := &struct {
-		Events []*linebot.Event `json:"events"`
-	}{}
-	if err := json.Unmarshal([]byte(r.Body), req); err != nil {
-		return nil, err
-	}
-
-	return req.Events, nil
-}
 
 func setUpLineClient() (*Line, error) {
 	line := &Line{
