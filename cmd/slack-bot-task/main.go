@@ -22,7 +22,7 @@ var secret = os.Getenv("SLACK_SIGNING_SECRET")
 var oAuthToken = os.Getenv("SLACK_OAUTH_TOKEN")
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	api := slack.New("xoxb-4588063634176-4577008852193-IXeR4FDhiNU4GK9tIvqBiCrc")
+	api := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
 	
 	body := request.Body
 	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionNoVerifyToken())
