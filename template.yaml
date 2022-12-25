@@ -24,7 +24,7 @@ Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: line-bot-task/
+      CodeUri: cmd/line-bot-task/
       Handler: line-bot-task
       Runtime: go1.x
       Architectures:
@@ -33,27 +33,32 @@ Resources:
         CatchAll:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /apigw
+            Path: /line-bot
             Method: POST
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
           LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
           LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
           TABLE_NAME: sample_table
-  # CalcFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     CodeUri: calc/dist
-  #     Handler: app.lambdaHandler
-  #     Runtime: go1.x
-  #     Architectures:
-  #       - x86_64
-  #     Events:
-  #       Calc:
-  #         Type: Api
-  #         Properties:
-  #           Path: /apigw
-  #           Method: post
+
+  SlackFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: cmd/slack-bot-task/
+      Handler: slack-bot-task
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /slack-bot
+            Method: POST
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
+          LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
 
   SampleTable:
     Type: AWS::DynamoDB::Table
