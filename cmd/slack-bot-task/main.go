@@ -2,11 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
@@ -14,10 +17,13 @@ import (
 // const AWS_REGION = "ap-northeast-1"
 // const DYNAMO_ENDPOINT = "http://dynamodb:8000"
 
+
 var secret = os.Getenv("SLACK_SIGNING_SECRET")
 var oAuthToken = os.Getenv("SLACK_OAUTH_TOKEN")
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	api := slack.New("xoxb-4588063634176-4577008852193-IXeR4FDhiNU4GK9tIvqBiCrc")
+	
 	body := request.Body
 	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionNoVerifyToken())
 	if err != nil {
@@ -27,15 +33,34 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	var res *slackevents.ChallengeResponse
 
 	switch eventsAPIEvent.Type {
-	case slackevents.URLVerification:
-		
-		if err := json.Unmarshal([]byte(body), &res); err != nil {
-			log.Println(err)
-			if err != nil {
-				return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
+		case slackevents.URLVerification:
+			if err := json.Unmarshal([]byte(body), &res); err != nil {
+				log.Println(err)
+				if err != nil {
+					return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
+				}
 			}
-		}
+		case slackevents.CallbackEvent:
+			innerEvent := eventsAPIEvent.InnerEvent
+			switch event := innerEvent.Data.(type) {
+			case *slackevents.AppMentionEvent:
+				msg := strings.Split(event.Text, " ")
+				// if len(msg) < 2 {
+                //     return
+                // }
+				log.Println(fmt.Sprintf("%s\n", msg))
+				cmd := msg[1]
+				switch cmd {
+				case "ping": 
+					log.Println("通過1")
+					_, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("pong", false))
+					if err != nil {
+						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
+					}
+				}
+			}
 	}
+	
 
 	return events.APIGatewayProxyResponse{
 		Body:       res.Challenge,
