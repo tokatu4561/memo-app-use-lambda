@@ -11,6 +11,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/guregu/dynamo"
 	"github.com/line/line-bot-sdk-go/linebot"
+
+	"github.com/tokatu4561/memo-app-use-lambda/line"
+	"github.com/tokatu4561/memo-app-use-lambda/models"
 )
 
 // TODO: env管理する
@@ -37,7 +40,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 			case *linebot.TextMessage:
 				replyMessage := message.Text
-				memo := Memo{}
+				memo := models.Memo{}
 				memo.Insert(db, replyMessage)
 				_, err = line.Client.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				if err != nil {
@@ -58,8 +61,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 }
 
 
-func setUpLineClient() (*Line, error) {
-	line := &Line{
+func setUpLineClient() (*line.Line, error) {
+	line := &line.Line{
 		ChannelSecret: os.Getenv("LINE_BOT_CHANNEL_SECRET"),
 		ChannelToken:  os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
 	}
