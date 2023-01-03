@@ -9,6 +9,7 @@ import (
 type Memo struct {
 	Id    string `dynamo:"Id,hash"`
 	Text      string `dynamo:"Text"`
+	UserID string 
 	CreatedAt time.Time `dynamo:"CreatedAt"`
 	UpdatedAt time.Time `dynamo:"UpdatedAt"`
 }
@@ -32,7 +33,7 @@ func (m *Memo) Insert(db *dynamo.DB, text string) (*Memo, error) {
 }
 
 func (m *Memo) Update(db *dynamo.DB, memo *Memo) (*Memo, error) {
-	table := db.Table("Task")
+	table := db.Table("Memo")
 
 	var updatedMemo *Memo
 
@@ -45,7 +46,7 @@ func (m *Memo) Update(db *dynamo.DB, memo *Memo) (*Memo, error) {
 }
 
 func Delete(db *dynamo.DB, memo *Memo) error {
-	table := db.Table("Task")
+	table := db.Table("Memo")
 
 	err := table.Delete("id", memo.Id).Run()
 	if err != nil {
@@ -56,7 +57,7 @@ func Delete(db *dynamo.DB, memo *Memo) error {
 }
 
 func Get(db *dynamo.DB, id string) (*Memo, error) {
-	table := db.Table("Task")
+	table := db.Table("Memo")
 
 	var memo *Memo
 
@@ -69,7 +70,7 @@ func Get(db *dynamo.DB, id string) (*Memo, error) {
 }
 
 func GetAll(db *dynamo.DB) ([]*Memo, error) {
-	table := db.Table("Task")
+	table := db.Table("Memo")
 
 	var memos []*Memo
 

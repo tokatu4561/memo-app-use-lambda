@@ -12,8 +12,8 @@ import (
 	"github.com/guregu/dynamo"
 	"github.com/line/line-bot-sdk-go/linebot"
 
-	"github.com/tokatu4561/memo-app-use-lambda/line"
-	"github.com/tokatu4561/memo-app-use-lambda/models"
+	"github.com/tokatu4561/memo-app-use/line"
+	"github.com/tokatu4561/memo-app-use/models"
 )
 
 // TODO: env管理する

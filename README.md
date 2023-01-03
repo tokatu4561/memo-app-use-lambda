@@ -1,7 +1,7 @@
 
 # line-dynamo-lambda
 slackとlinebotを使って
-task管理する
+memo管理する
 
 ## start
 ```bash

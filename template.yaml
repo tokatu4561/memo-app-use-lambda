@@ -24,8 +24,8 @@ Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: cmd/line-bot-task/
-      Handler: line-bot-task
+      CodeUri: cmd/line-bot-memo/
+      Handler: line-bot-memo
       Runtime: go1.x
       Architectures:
         - x86_64
@@ -44,8 +44,8 @@ Resources:
   SlackFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: cmd/slack-bot-task/
-      Handler: slack-bot-task
+      CodeUri: cmd/slack-bot-memo/
+      Handler: slack-bot-memo
       Runtime: go1.x
       Architectures:
         - x86_64
