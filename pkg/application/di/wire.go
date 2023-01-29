@@ -1,4 +1,4 @@
-// package di
+package di
 
 // import (
 // 	"github.com/google/wire"

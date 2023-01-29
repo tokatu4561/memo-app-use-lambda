@@ -22,6 +22,8 @@ func NewMemoController() *application.MemoController {
 	return memoController
 }
 
+// Injectors from wire.go:
+
 func NewSlackMemoController() *application.SlackMemoController {
 	db := dynamo.NewDynamoDatabaseHandler()
 	memoRepositoryInterface := dynamo.NewMemoRepository(db)
