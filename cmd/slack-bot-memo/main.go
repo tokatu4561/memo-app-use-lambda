@@ -25,14 +25,8 @@ var oAuthToken = os.Getenv("SLACK_OAUTH_TOKEN")
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	api := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
 
-	// slack からのリクエストかを検証 外部からのリクエストを受け付けないように
-	// ヘッダー、body、Signing Secretで検証
-	verifier, err := slack.NewSecretsVerifier(ConvertHeaders(request.Headers), os.Getenv("SLACK_SIGNING_SECRET"))
+	err := Verify(ConvertHeaders(request.Headers), []byte(request.Body))
 	if err != nil {
-		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
-	}
-	verifier.Write([]byte(request.Body))
-	if err := verifier.Ensure(); err != nil {
 		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 400}, err
 	}
 	
@@ -104,6 +98,22 @@ func HandleURLVerification(body string) (*slackevents.ChallengeResponse ,error) 
 	}
 
 	return res, nil
+}
+
+// slack からのリクエストかを検証 外部からのリクエストを受け付けないように
+// ヘッダー、body、Signing Secretで検証
+func Verify (header http.Header, body []byte) error {
+	verifier, err := slack.NewSecretsVerifier(header, os.Getenv("SLACK_SIGNING_SECRET"))
+	if err != nil {
+		return err
+	}
+
+	verifier.Write(body)
+	if err := verifier.Ensure(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func main() {
