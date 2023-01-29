@@ -24,32 +24,36 @@ var oAuthToken = os.Getenv("SLACK_OAUTH_TOKEN")
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	api := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
 
+	// slack からのリクエストかを検証 外部からのリクエストを受け付けないように
+	// ヘッダー、body、Signing Secretで検証
 	verifier, err := slack.NewSecretsVerifier(ConvertHeaders(request.Headers), os.Getenv("SLACK_SIGNING_SECRET"))
 	if err != nil {
 		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
 	}
-
+	verifier.Write([]byte(request.Body))
 	if err := verifier.Ensure(); err != nil {
-		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
+		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 400}, err
 	}
 	
 	body := request.Body
-	// bodyReader := io.TeeReader(body, &verifier)
 	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionNoVerifyToken())
 	if err != nil {
 		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
 	}
-
-	var res *slackevents.ChallengeResponse
-
+	
 	switch eventsAPIEvent.Type {
 		case slackevents.URLVerification:
+			var res *slackevents.ChallengeResponse
 			if err := json.Unmarshal([]byte(body), &res); err != nil {
 				log.Println(err)
 				if err != nil {
 					return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
 				}
 			}
+			return events.APIGatewayProxyResponse{
+				Body:       res.Challenge,
+				StatusCode: 200,
+			}, nil
 		case slackevents.CallbackEvent:
 			innerEvent := eventsAPIEvent.InnerEvent
 			switch event := innerEvent.Data.(type) {
@@ -69,7 +73,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 	
 	return events.APIGatewayProxyResponse{
-		Body:       res.Challenge,
+		Body:       "",
 		StatusCode: 200,
 	}, nil
 }
