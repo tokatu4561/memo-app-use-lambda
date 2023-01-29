@@ -11,6 +11,10 @@ Parameters:
     Type: String
   LineBotChannelToken:
     Type: String
+  SlackOauthToken:
+    Type: String
+  SlackSigingSecret:
+    Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -59,6 +63,8 @@ Resources:
         Variables:
           LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
           LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
+          SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
+          SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
 
   SampleTable:
     Type: AWS::DynamoDB::Table
