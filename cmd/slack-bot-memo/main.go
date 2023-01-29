@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
+	"github.com/tokatu4561/memo-app-use/pkg/application/di"
 )
 
 // TODO: env管理する
@@ -40,15 +41,12 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
 	}
-	
+
 	switch eventsAPIEvent.Type {
 		case slackevents.URLVerification:
-			var res *slackevents.ChallengeResponse
-			if err := json.Unmarshal([]byte(body), &res); err != nil {
-				log.Println(err)
-				if err != nil {
-					return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
-				}
+			res, err := HandleURLVerification(body)
+			if err != nil {
+				return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
 			}
 			return events.APIGatewayProxyResponse{
 				Body:       res.Challenge,
@@ -61,10 +59,23 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 				msg := strings.Split(event.Text, " ")
 				log.Println(fmt.Sprintf("%s\n", msg))
 				cmd := msg[1]
+				ctl := di.NewSlackMemoController()
+
 				switch cmd {
 				case "ping": 
 					// MsgOptionText() の第二引数に true を設定すると特殊文字をエスケープする
 					_, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("pong", false))
+					if err != nil {
+						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
+					}
+				case "memo":
+					memo, err := ctl.CreateMemo(event)
+					if err != nil {
+						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
+					}
+
+					responseMsg := fmt.Sprintf("%sを追加しました!", memo.Title)
+					_, _, err = api.PostMessage(event.Channel, slack.MsgOptionText(responseMsg, false))
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
@@ -84,6 +95,15 @@ func ConvertHeaders(headers map[string]string) http.Header {
         h.Set(key, value)
     }
     return h
+}
+
+func HandleURLVerification(body string) (*slackevents.ChallengeResponse ,error) {
+	var res *slackevents.ChallengeResponse
+	if err := json.Unmarshal([]byte(body), &res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func main() {
