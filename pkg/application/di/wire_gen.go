@@ -21,3 +21,11 @@ func NewMemoController() *application.MemoController {
 	memoController := application.NewMemoController(memoUseCaseInterface)
 	return memoController
 }
+
+func NewSlackMemoController() *application.SlackMemoController {
+	db := dynamo.NewDynamoDatabaseHandler()
+	memoRepositoryInterface := dynamo.NewMemoRepository(db)
+	memoUseCaseInterface := usecases.NewMemoUsecase(memoRepositoryInterface)
+	memoController := application.NewSlackMemoController(memoUseCaseInterface)
+	return memoController
+}

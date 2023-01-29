@@ -1,4 +1,4 @@
-package di
+// package di
 
 // import (
 // 	"github.com/google/wire"
@@ -16,4 +16,14 @@ package di
 // 	)
 
 // 	return &application.MemoController{}
+// }
+
+// func NewSlackMemoController() *application.SlackMemoController {
+// 	wire.Build(application.NewMemoController,
+// 		usecases.NewMemoUsecase,
+// 		dynamo.NewMemoRepository,
+// 		dynamo.NewDynamoDatabaseHandler,
+// 	)
+
+// 	return &application.SlackMemoController{}
 // }
