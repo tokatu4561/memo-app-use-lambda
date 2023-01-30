@@ -1,6 +1,7 @@
 package application
 
 import (
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,7 +19,7 @@ func NewSlackMemoController(memoUsecase domain.MemoUseCaseInterface) *SlackMemoC
 	}
 }
 
-func (t *SlackMemoController) GetMemos(event slackevents.AppMentionEvent) ([]*domain.Memo, error) {
+func (t *SlackMemoController) GetMemos(event *slackevents.AppMentionEvent) ([]*domain.Memo, error) {
 	memos, err := t.memoUsecase.GetMemos()
 	if err != nil {
 		return nil, err
@@ -28,31 +29,24 @@ func (t *SlackMemoController) GetMemos(event slackevents.AppMentionEvent) ([]*do
 }
 
 func (t *SlackMemoController) GetMemo(event *slackevents.AppMentionEvent) (*domain.Memo, error) {
-	id := request.PathParameters["id"]
-
-	memo, err := t.memoUsecase.GetMemo(id)
-	if err != nil {
-		return nil, err
+	memo := &domain.Memo{
+		ID: "test1",
+		Title: "テスト",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	return memo, nil
 }
 
 func (t *SlackMemoController) CreateMemo(event *slackevents.AppMentionEvent) (*domain.Memo, error) {
-	type RequestPayload struct {
-		Memo Memo `json:"memo"`
-	}
-	var requestPayload RequestPayload
-	t.readJson(request, &requestPayload)
-
-	event.InnerEvent.Data.Text
+	msg := strings.Split(event.Text, " ")
 
 	newId := uuid.New()
 
 	memo := domain.Memo{
 		ID:        newId.String(),
-		UserID:    requestPayload.Memo.UserID,
-		Title:     requestPayload.Memo.Title,
+		Title:     msg[2],
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -66,38 +60,24 @@ func (t *SlackMemoController) CreateMemo(event *slackevents.AppMentionEvent) (*d
 }
 
 func (t *SlackMemoController) UpdateMemo(event *slackevents.AppMentionEvent) (*domain.Memo, error) {
-	type RequestPayload struct {
-		Memo Memo
-	}
-	var requestPayload RequestPayload
-	t.readJson(request, &requestPayload)
-
-	memo := domain.Memo{
-		ID:        requestPayload.Memo.ID,
-		UserID:    requestPayload.Memo.UserID,
-		Title:     requestPayload.Memo.Title,
+	updatedMemo := &domain.Memo{
+		ID: "test1",
+		Title: "テスト",
+		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-	}
-
-	updatedMemo, err := t.memoUsecase.UpdateMemo(&memo)
-	if err != nil {
-		return nil, err
 	}
 
 	return updatedMemo, nil
 }
 
 func (t *SlackMemoController) DeleteMemo(event *slackevents.AppMentionEvent) error {
-	type RequestPayload struct {
-		Memo Memo `json:"memo"`
-	}
-	var requestPayload RequestPayload
-	t.readJson(request, &requestPayload)
+	// msg := strings.Split(event.Text, " ")
 
 	memo := domain.Memo{
-		ID:     requestPayload.Memo.ID,
-		UserID: requestPayload.Memo.UserID,
-		Title:  requestPayload.Memo.Title,
+		ID: "test1",
+		Title: "テスト",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	err := t.memoUsecase.DeleteMemo(&memo)
