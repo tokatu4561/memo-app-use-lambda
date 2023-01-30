@@ -9,6 +9,7 @@ package di
 import (
 	"github.com/tokatu4561/memo-app-use/pkg/application"
 	"github.com/tokatu4561/memo-app-use/pkg/infrastructure/dynamo"
+	"github.com/tokatu4561/memo-app-use/pkg/infrastructure/mock"
 	"github.com/tokatu4561/memo-app-use/pkg/usecases"
 )
 
@@ -25,8 +26,10 @@ func NewMemoController() *application.MemoController {
 // Injectors from wire.go:
 
 func NewSlackMemoController() *application.SlackMemoController {
-	db := dynamo.NewDynamoDatabaseHandler()
-	memoRepositoryInterface := dynamo.NewMemoRepository(db)
+	// db := dynamo.NewDynamoDatabaseHandler()
+	// memoRepositoryInterface := dynamo.NewMemoRepository(db)
+	db := mock.NewMockDatabaseHandler()
+	memoRepositoryInterface := mock.NewMockMemoRepository(db)
 	memoUseCaseInterface := usecases.NewMemoUsecase(memoRepositoryInterface)
 	memoController := application.NewSlackMemoController(memoUseCaseInterface)
 	return memoController

@@ -1,4 +1,4 @@
-package dynamo
+package mock
 
 import (
 	"time"
@@ -17,7 +17,7 @@ type DatabaseHandler struct {
 	Conn *dynamo.DB
 }
 
-func NewDynamoDatabaseHandler() *MockDatabase {
+func NewMockDatabaseHandler() *MockDatabase {
 	return &MockDatabase{}
 }
 
