@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -51,7 +50,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			switch event := innerEvent.Data.(type) {
 			case *slackevents.AppMentionEvent:
 				msg := strings.Split(event.Text, " ")
-				log.Println(fmt.Sprintf("%s\n", msg))
 				cmd := msg[1]
 				ctl := di.NewSlackMemoController()
 
@@ -70,6 +68,39 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 					responseMsg := fmt.Sprintf("%sを追加しました!", memo.Title)
 					_, _, err = api.PostMessage(event.Channel, slack.MsgOptionText(responseMsg, false))
+					if err != nil {
+						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
+					}
+				case "list":
+					_, err := ctl.GetMemos(event)
+					if err != nil {
+						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
+					}
+
+					attachment := slack.Attachment{
+						Pretext:    "pretext",
+						Fallback:   "We don't currently support your client",
+						CallbackID: "accept_or_reject",
+						Color:      "#3AA3E3",
+						Actions: []slack.AttachmentAction{
+							{
+								Name:  "accept",
+								Text:  "Accept",
+								Type:  "button",
+								Value: "accept",
+							},
+							{
+								Name:  "reject",
+								Text:  "Reject",
+								Type:  "button",
+								Value: "reject",
+								Style: "danger",
+							},
+						},
+					}
+
+					message := slack.MsgOptionAttachments(attachment)
+					_, _, err = api.PostMessage(event.Channel, slack.MsgOptionText("", false), message)
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}

@@ -13,7 +13,6 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 
 	"github.com/tokatu4561/memo-app-use/line"
-	"github.com/tokatu4561/memo-app-use/models"
 )
 
 // TODO: env管理する
@@ -31,8 +30,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return events.APIGatewayProxyResponse{Body: "LINE接続エラー", StatusCode: 500}, err
 	}
 
-	db, _ := setUpDB()
-
 	for _, event := range lineEvents {
 		// イベントがメッセージの受信だった場合
 		if event.Type == linebot.EventTypeMessage {
@@ -40,8 +37,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 			case *linebot.TextMessage:
 				replyMessage := message.Text
-				memo := models.Memo{}
-				memo.Insert(db, replyMessage)
 				_, err = line.Client.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				if err != nil {
 					return events.APIGatewayProxyResponse{

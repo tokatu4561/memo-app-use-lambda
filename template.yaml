@@ -65,6 +65,25 @@ Resources:
           LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
           SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
           SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
+  SlackFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: cmd/slack-bot-memo-interactive/
+      Handler: slack-bot-memo
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /slack-bot/interactive
+            Method: POST
+      Environment:
+          LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
+          LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
+          SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
+          SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
 
   SampleTable:
     Type: AWS::DynamoDB::Table
