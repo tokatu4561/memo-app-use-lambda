@@ -61,7 +61,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
 				case "memo":
-					memo, err := ctl.CreateMemo(event)
+					memo, err := ctl.CreateMemo(msg[2])
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
@@ -72,7 +72,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
 				case "list":
-					_, err := ctl.GetMemos(event)
+					_, err := ctl.GetMemos()
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
