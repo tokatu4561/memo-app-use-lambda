@@ -17,11 +17,6 @@ func NewSlackMemoController(memoUsecase domain.MemoUseCaseInterface) *SlackMemoC
 	}
 }
 
-type MemoPayload struct {
-	id string
-	title string
-}
-
 func (t *SlackMemoController) GetMemos() ([]*domain.Memo, error) {
 	memos, err := t.memoUsecase.GetMemos()
 	if err != nil {
@@ -29,17 +24,6 @@ func (t *SlackMemoController) GetMemos() ([]*domain.Memo, error) {
 	}
 
 	return memos, nil
-}
-
-func (t *SlackMemoController) GetMemo(id string) (*domain.Memo, error) {
-	memo := &domain.Memo{
-		ID: "test1",
-		Title: "テスト",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	return memo, nil
 }
 
 func (t *SlackMemoController) CreateMemo(text string) (*domain.Memo, error) {
@@ -62,25 +46,9 @@ func (t *SlackMemoController) CreateMemo(text string) (*domain.Memo, error) {
 	return newMemo, nil
 }
 
-func (t *SlackMemoController) UpdateMemo(memo MemoPayload) (*domain.Memo, error) {
-	updatedMemo := &domain.Memo{
-		ID: "test1",
-		Title: "テスト",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	return updatedMemo, nil
-}
-
 func (t *SlackMemoController) DeleteMemo(id string) error {
-	// msg := strings.Split(event.Text, " ")
-
 	memo := domain.Memo{
-		ID: "test1",
-		Title: "テスト",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID: id,
 	}
 
 	err := t.memoUsecase.DeleteMemo(&memo)
