@@ -24,6 +24,7 @@ var oAuthToken = os.Getenv("SLACK_OAUTH_TOKEN")
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	api := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
 
+	// slack からのリクエストかどうかを検証する
 	err := Verify(ConvertHeaders(request.Headers), []byte(request.Body))
 	if err != nil {
 		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 400}, err
@@ -35,8 +36,10 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
 	}
 
+	// 受け取ったslack のイベントに応じて処理
 	switch eventsAPIEvent.Type {
 		case slackevents.URLVerification:
+			// slack に登録する の コールバック url(こちら側で処理するアプリ側のURL) が有効かどうか確かめるため
 			res, err := HandleURLVerification(body)
 			if err != nil {
 				return events.APIGatewayProxyResponse{Body: "slack conection error", StatusCode: 500}, err
@@ -54,13 +57,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 				ctl := di.NewSlackMemoController()
 
 				switch cmd {
-				case "ping": 
-					// MsgOptionText() の第二引数に true を設定すると特殊文字をエスケープする
-					_, _, err := api.PostMessage(event.Channel, slack.MsgOptionText("pong", false))
-					if err != nil {
-						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
-					}
 				case "memo":
+					// 新しくメモを追加する
 					memo, err := ctl.CreateMemo(msg[2])
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
@@ -72,11 +70,15 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
 				case "list":
+					// 保存されているメモのリストを通知する
+
+					// 全てのメモを取得
 					_, err := ctl.GetMemos()
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
 
+					// slack へメモのリストを通知
 					attachment := slack.Attachment{
 						Pretext:    "pretext",
 						Fallback:   "We don't currently support your client",
@@ -98,7 +100,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 							},
 						},
 					}
-
 					message := slack.MsgOptionAttachments(attachment)
 					_, _, err = api.PostMessage(event.Channel, slack.MsgOptionText("", false), message)
 					if err != nil {
