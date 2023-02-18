@@ -25,15 +25,11 @@ Globals:
     TracingEnabled: True
 
 Resources:
-  RestApi:
-    Type: AWS::Serverless::Api # API Gateway
-    Properties:
-      StageName: Dev # デプロイするステージ名
-      DefinitionBody:
-        Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: ./src/swagger.yml # swaggerファイルのパス指定
+      # DefinitionBody:
+      #   Fn::Transform:
+      #     Name: AWS::Include
+      #     Parameters:
+      #       Location: ./src/swagger.yml # swaggerファイルのパス指定
       
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -90,12 +86,39 @@ Resources:
           Properties:
             Path: /slack-bot/interactive
             Method: POST
-            RestApiId: !Ref RestApi # RestApiの定義を参照
+            RestApiId:
+              Ref: RestApi
       Environment:
           LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
           LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
           SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
           SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
+  
+  RestApi:
+    Type: AWS::Serverless::Api # API Gateway
+    Properties:
+      StageName: Dev # デプロイするステージ名
+      DefinitionBody:
+        swagger: 2.0
+        path:
+          /slack-bot/interactive:
+            post:
+              consumes:
+                - application/x-www-form-urlencoded
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: 200 response
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: 200
+                httpMethod: POST
+                type: aws_proxy
+                contentHandling: CONVERT_TO_TEXT
+                requestTemplates:
+                  application/x-www-form-urlencoded: "{\"body\": $util.urlDecode($input.json(\"$\"))}"
 
   SampleTable:
     Type: AWS::DynamoDB::Table
