@@ -81,9 +81,9 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 					// slack へメモのリストを 1つづつ通知
 					for _, memo := range memos {
 						attachment := slack.Attachment{
-							Pretext:    "pretext",
+							Pretext:    memo.Title,
 							Fallback:   "We don't currently support your client",
-							CallbackID: "accept_or_reject",
+							CallbackID: "continue_or_complete",
 							Color:      "#3AA3E3",
 							Actions: []slack.AttachmentAction{
 								{
@@ -97,7 +97,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 									Text:  "完了",
 									Type:  "button",
 									Value: memo.ID,
-									Style: "success",
+									Style: "primary",
 								},
 							},
 						}
