@@ -89,6 +89,7 @@ Resources:
             RestApiId:
               Ref: RestApi
       Environment:
+        Variables:
           LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
           LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
           SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
