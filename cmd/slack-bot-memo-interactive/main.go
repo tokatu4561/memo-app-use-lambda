@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"net/url"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/slack-go/slack"
+	"github.com/tokatu4561/memo-app-use/pkg/application/di"
 )
 
 type Actions struct {
@@ -36,25 +37,29 @@ type MessageActionPayload struct {
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	slackApi := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
 
-	// JSONを読み取る
-	type RequestPayload struct {
-		Payload MessageActionPayload `json:"payload"`
+	// body を json にエンコード
+	q, _ := url.ParseQuery(request.Body)
+	qPayload := q.Get("payload")
+
+	// JSONを struct に読み取る
+	var payload MessageActionPayload
+	err := json.Unmarshal([]byte(qPayload), &payload)
+	if err != nil {
+		return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 	}
-	var payload RequestPayload
-	// readJson(request, &payload)
 
-	_ = json.Unmarshal([]byte(request.Body), &payload)
-
-	fmt.Printf("Request body. %+v\n", request.Body)
-	log.Println(payload)
-
+	// continue 継続であれば削除処理 せずに レスポンス返す
+	if (payload.Actions[0].Name == "continue") {
+		return events.APIGatewayProxyResponse{Body: "", StatusCode: 200 }, nil
+	}
+	
 	// 対象のメモを削除する
-	// ctl := di.NewSlackMemoController()
-	// ctl.DeleteMemo()
+	ctl := di.NewSlackMemoController()
+	ctl.DeleteMemo(payload.Actions[0].Value)
 
 	// 削除したことをslackのチャンネルに通知する
-	responseMsg := fmt.Sprintf("%sを追加しました!", "a")
-	_, _, err := slackApi.PostMessage(payload.Payload.Channel.Id, slack.MsgOptionText(responseMsg, false))
+	responseMsg := fmt.Sprintf("%sをリストから削除しました!", "a")
+	_, _, err = slackApi.PostMessage(payload.Channel.Id, slack.MsgOptionText(responseMsg, false))
 	if err != nil {
 		return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 	}
@@ -63,15 +68,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		Body:       "",
 		StatusCode: 200,
 	}, nil
-}
-
-func readJson(req events.APIGatewayProxyRequest, data interface{}) error {
-	err := json.Unmarshal([]byte(req.Body), &data)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func main() {
