@@ -22,7 +22,7 @@ var secret = os.Getenv("SLACK_SIGNING_SECRET")
 var oAuthToken = os.Getenv("SLACK_OAUTH_TOKEN")
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	api := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
+	slackApi := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
 
 	// slack からのリクエストかどうかを検証する
 	err := Verify(ConvertHeaders(request.Headers), []byte(request.Body))
@@ -65,7 +65,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 					}
 
 					responseMsg := fmt.Sprintf("%sを追加しました!", memo.Title)
-					_, _, err = api.PostMessage(event.Channel, slack.MsgOptionText(responseMsg, false))
+					_, _, err = slackApi.PostMessage(event.Channel, slack.MsgOptionText(responseMsg, false))
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
@@ -73,35 +73,38 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 					// 保存されているメモのリストを通知する
 
 					// 全てのメモを取得
-					_, err := ctl.GetMemos()
+					memos, err := ctl.GetMemos()
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
 
-					// slack へメモのリストを通知
-					attachment := slack.Attachment{
-						Pretext:    "pretext",
-						Fallback:   "We don't currently support your client",
-						CallbackID: "accept_or_reject",
-						Color:      "#3AA3E3",
-						Actions: []slack.AttachmentAction{
-							{
-								Name:  "accept",
-								Text:  "Accept",
-								Type:  "button",
-								Value: "accept",
+					// slack へメモのリストを 1つづつ通知
+					for _, memo := range memos {
+						attachment := slack.Attachment{
+							Pretext:    "pretext",
+							Fallback:   "We don't currently support your client",
+							CallbackID: "accept_or_reject",
+							Color:      "#3AA3E3",
+							Actions: []slack.AttachmentAction{
+								{
+									Name:  "continue",
+									Text:  "継続",
+									Type:  "button",
+									Value: memo.ID,
+								},
+								{
+									Name:  "complete",
+									Text:  "完了",
+									Type:  "button",
+									Value: memo.ID,
+									Style: "success",
+								},
 							},
-							{
-								Name:  "reject",
-								Text:  "Reject",
-								Type:  "button",
-								Value: "reject",
-								Style: "danger",
-							},
-						},
+						}
+						message := slack.MsgOptionAttachments(attachment)
+						_, _, err = slackApi.PostMessage(event.Channel, slack.MsgOptionText("", false), message)
 					}
-					message := slack.MsgOptionAttachments(attachment)
-					_, _, err = api.PostMessage(event.Channel, slack.MsgOptionText("", false), message)
+					
 					if err != nil {
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
