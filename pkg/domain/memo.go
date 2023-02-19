@@ -5,7 +5,6 @@ import "time"
 // FIXEME: domainなのにdynamoの情報を書いてる
 type Memo struct {
 	ID        string    `dynamo:"id" json:"id"`
-	UserID    int       `dynamo:"userId" json:"user_id"`
 	Title     string    `dynamo:"title" json:"title"`
 	CreatedAt time.Time `dynamo:"createdAt" json:"created_at"`
 	UpdatedAt time.Time `dynamo:"updatedAt" json:"updated_at"`

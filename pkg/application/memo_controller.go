@@ -60,7 +60,6 @@ func (t *MemoController) CreateMemo(request events.APIGatewayProxyRequest) (*dom
 
 	memo := domain.Memo{
 		ID:        newId.String(),
-		UserID:    requestPayload.Memo.UserID,
 		Title:     requestPayload.Memo.Title,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -83,7 +82,6 @@ func (t *MemoController) UpdateMemo(request events.APIGatewayProxyRequest) (*dom
 
 	memo := domain.Memo{
 		ID:        requestPayload.Memo.ID,
-		UserID:    requestPayload.Memo.UserID,
 		Title:     requestPayload.Memo.Title,
 		UpdatedAt: time.Now(),
 	}
@@ -105,7 +103,6 @@ func (t *MemoController) DeleteMemo(request events.APIGatewayProxyRequest) error
 
 	memo := domain.Memo{
 		ID:     requestPayload.Memo.ID,
-		UserID: requestPayload.Memo.UserID,
 		Title:  requestPayload.Memo.Title,
 	}
 
