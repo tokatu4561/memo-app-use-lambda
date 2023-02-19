@@ -15,6 +15,8 @@ Parameters:
     Type: String
   SlackSigingSecret:
     Type: String
+  DynamoEndpoint:
+    Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -67,10 +69,9 @@ Resources:
             Method: POST
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
-          LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
-          LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
           SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
           SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
+          DYNAMO_ENDPOINT: !Ref DynamoEndpoint
 
   SlackInteractiveFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -90,10 +91,9 @@ Resources:
               Ref: RestApi
       Environment:
         Variables:
-          LINE_BOT_CHANNEL_SECRET: !Ref LineBotChannelSecret
-          LINE_BOT_CHANNEL_TOKEN: !Ref LineBotChannelToken
           SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
           SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
+          DYNAMO_ENDPOINT: !Ref DynamoEndpoint
   
   RestApi:
     Type: AWS::Serverless::Api # API Gateway
