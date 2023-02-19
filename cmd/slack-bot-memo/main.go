@@ -71,6 +71,10 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 						return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 					}
 
+					if (len(memos) == 0) {
+						_, _, err = slackApi.PostMessage(event.Channel, slack.MsgOptionText("メモがありません。", false))
+					}
+
 					// slack へメモのリストを 1つづつ通知
 					for _, memo := range memos {
 						attachment := slack.Attachment{
