@@ -2,6 +2,7 @@ require (
 	github.com/aws/aws-lambda-go v1.23.0
 	github.com/aws/aws-sdk-go v1.44.129
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/wire v0.5.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/guregu/dynamo v1.17.0
 	github.com/line/line-bot-sdk-go v7.8.0+incompatible
