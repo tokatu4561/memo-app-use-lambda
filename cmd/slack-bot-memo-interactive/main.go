@@ -57,9 +57,9 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	ctl := di.NewSlackMemoController()
 	ctl.DeleteMemo(payload.Actions[0].Value)
 
-	// 削除したことをslackのチャンネルに通知する
-	responseMsg := fmt.Sprintf("%sをリストから削除しました!", "a")
-	_, _, err = slackApi.PostMessage(payload.Channel.Id, slack.MsgOptionText(responseMsg, false))
+	// 削除したことをslackのチャンネルに通知する 対象のメッセージに対しを編集する
+	responseMsg := fmt.Sprintf("リストから削除しました!")
+	_, _, _, err = slackApi.UpdateMessage(payload.Channel.Id, payload.MessageTs, slack.MsgOptionText(responseMsg, false))
 	if err != nil {
 		return events.APIGatewayProxyResponse{Body: "bad request", StatusCode: 400}, err
 	}
