@@ -14,13 +14,6 @@ import (
 	"github.com/tokatu4561/memo-app-use/pkg/application/di"
 )
 
-// TODO: env管理する
-const AWS_REGION = "ap-northeast-1"
-const DYNAMO_ENDPOINT = "http://dynamodb:8000"
-
-var secret = os.Getenv("SLACK_SIGNING_SECRET")
-var oAuthToken = os.Getenv("SLACK_OAUTH_TOKEN")
-
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	slackApi := slack.New(os.Getenv("SLACK_OAUTH_TOKEN"))
 
