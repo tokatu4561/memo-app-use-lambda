@@ -27,13 +27,11 @@ func (t *SlackMemoController) GetMemos() ([]*domain.Memo, error) {
 }
 
 func (t *SlackMemoController) CreateMemo(text string) (*domain.Memo, error) {
-	msg := text
-
 	newId := uuid.New()
 
 	memo := domain.Memo{
 		ID:        newId.String(),
-		Title:     msg,
+		Title:     text,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
