@@ -15,7 +15,7 @@ Parameters:
     Type: String
   SlackSigingSecret:
     Type: String
-  DynamoEndpoint:
+  DynamodbEndpoint:
     Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
@@ -71,7 +71,7 @@ Resources:
         Variables:
           SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
           SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
-          DYNAMO_ENDPOINT: !Ref DynamoEndpoint
+          DYNAMODB_ENDPOINT: !Ref DynamoEndpoint
 
   SlackInteractiveFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -93,7 +93,7 @@ Resources:
         Variables:
           SLACK_OAUTH_TOKEN: !Ref SlackOauthToken
           SLACK_SIGNING_SECRET: !Ref SlackSigingSecret
-          DYNAMO_ENDPOINT: !Ref DynamoEndpoint
+          DYNAMODB_ENDPOINT: !Ref DynamodbEndpoint
   
   RestApi:
     Type: AWS::Serverless::Api # API Gateway
@@ -121,20 +121,16 @@ Resources:
                 requestTemplates:
                   application/x-www-form-urlencoded: "{\"body\": $util.urlDecode($input.json(\"$\"))}"
 
-  SampleTable:
+  MemoTable:
     Type: AWS::DynamoDB::Table
     Properties: 
-      TableName: sample_table
+      TableName: Memo
       AttributeDefinitions: 
-        - AttributeName: sample_pk
+        - AttributeName: id
           AttributeType: S
-        - AttributeName: sample_sk
-          AttributeType: N
       KeySchema: 
         - AttributeName: sample_pk
           KeyType: HASH
-        - AttributeName: sample_sk
-          KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
 
 Outputs:
