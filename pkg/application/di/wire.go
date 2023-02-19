@@ -3,9 +3,9 @@ package di
 // import (
 // 	"github.com/google/wire"
 
-// 	"github.com/tokatu4561/memos/pkg/application"
-// 	"github.com/tokatu4561/memos/pkg/infrastructure/dynamo"
-// 	"github.com/tokatu4561/memos/pkg/usecases"
+// 	"github.com/tokatu4561/memo-app-use/pkg/application"
+// 	"github.com/tokatu4561/memo-app-use/pkg/infrastructure/dynamo"
+// 	"github.com/tokatu4561/memo-app-use/pkg/usecases"
 // )
 
 // func NewMemoController() *application.MemoController {
@@ -19,7 +19,7 @@ package di
 // }
 
 // func NewSlackMemoController() *application.SlackMemoController {
-// 	wire.Build(application.NewMemoController,
+// 	wire.Build(application.NewSlackMemoController,
 // 		usecases.NewMemoUsecase,
 // 		dynamo.NewMemoRepository,
 // 		dynamo.NewDynamoDatabaseHandler,
