@@ -13,24 +13,24 @@ import (
 )
 
 type Actions struct {
-	Name string `json:"name"`
-	Value string `json:"value"`
+	Name 	   string `json:"name"`
+	Value 	   string `json:"value"`
 	ActionType string `json:"type"`
 }
 
 type MessageActionPayload struct {
-	Actions []*Actions `json:"actions"`
-	CallbackId string `json:"callback_id"`
+	Actions    []*Actions `json:"actions"`
+	CallbackId string  `json:"callback_id"`
 	Channel struct {
-		Id string `json:"id"`
+		Id   string `json:"id"`
 		Name string `json:"name"`
 	} `json:"channel"`
 	User struct {
-		Id string `json:"id"`
+		Id   string `json:"id"`
 		Name string `json:"name"`
 	} `json:"User"`
-	ActionTs string `json:"action_ts"`
-	MessageTs string `json:"message_ts"`
+	ActionTs 	 string `json:"action_ts"`
+	MessageTs 	 string `json:"message_ts"`
 	AttachmentId string `json:"attachment_id"`
 }
 
